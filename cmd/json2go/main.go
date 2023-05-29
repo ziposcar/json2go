@@ -1,8 +1,9 @@
 // json2go generates Go type definitions from JSON encoded objects as
 // defined in RFC 4627.  The type can be one of the following:
-//    map[string]T
-//    map[string][]T
-//    Type
+//
+//	map[string]T
+//	map[string][]T
+//	Type
 //
 // The result is Go source for the provided package name, with the type
 // definiton(s) for the JSON.  If no package name is provided, the name
@@ -38,7 +39,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/mohae/json2go"
+	"github.com/ziposcar/json2go"
 )
 
 // handle flags that are string arrays
@@ -78,6 +79,7 @@ var (
 	mapType    bool
 	help       bool
 	tagKeys    stringArr
+	stringTag  bool
 )
 
 func init() {
@@ -101,6 +103,8 @@ func init() {
 	flag.BoolVar(&help, "h", false, "the short flag for -help")
 	flag.Var(&tagKeys, "tagkeys", "additional struct tag keys; can be used more than once")
 	flag.Var(&tagKeys, "t", "the short flag for -tagkeys")
+	flag.BoolVar(&stringTag, "stringtag", false, "add `,string` after tag if the string type field can be parsed as a Int/Float value.")
+	flag.BoolVar(&stringTag, "S", false, "the short flag for -guess")
 }
 
 func main() {
@@ -196,8 +200,10 @@ func realMain() int {
 		t.SetPkg(pkg)
 	}
 	t.MapType = mapType
+	t.StringTag = stringTag
 	t.SetStructName(structName)
 	t.SetTagKeys(tagKeys.Get())
+
 	// Generate the Go Types
 	err = t.Gen()
 	if err != nil {
@@ -254,6 +260,8 @@ flag              default   description
 -h  -help         false     Print the help text; 'help' is also valid.
 -t  -tagkey                 Additional key to be added to struct tags.
                             For multiple keys, use one per key value.
+-S  -stringtag    false     Add ',string' to tags which could be parsed
+                            as a number type.
 `
 	fmt.Println(helpText)
 }
